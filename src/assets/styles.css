@@ -23,6 +23,34 @@
 }
 
 /* ── Reset ── */
+/* ── Tema rosa (sutil): redefine los tokens de marca, fondo y bordes.
+   Los colores semánticos (verde/ámbar/rojo de los semáforos) se mantienen. ── */
+:root[data-theme='rosa'] {
+  --brand: #c2729a;
+  --brand-light: #faeef4;
+  --brand-dark: #8e4e70;
+  --accent: #e0786e;
+  --accent-light: #fbeeec;
+  --bg: #fbf6f9;
+  --surface: #ffffff;
+  --border: #efdde8;
+  --text: #2a2230;
+  --muted: #8a7a85;
+  --shadow: 0 4px 24px rgba(194, 114, 154, 0.12);
+}
+
+/* Crossfade de colores durante el cambio de tema (clase temporal en <html>). */
+html.theme-anim,
+html.theme-anim * {
+  transition:
+    background-color 0.45s ease,
+    border-color 0.45s ease,
+    color 0.45s ease,
+    fill 0.45s ease,
+    stroke 0.45s ease,
+    box-shadow 0.45s ease !important;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
