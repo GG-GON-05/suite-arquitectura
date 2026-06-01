@@ -9,7 +9,31 @@ import {
 import RangeSlider from '@/components/ui/RangeSlider.vue'
 import ToggleGroup from '@/components/ui/ToggleGroup.vue'
 import CopyButton from '@/components/ui/CopyButton.vue'
+import InfoModal from '@/components/ui/InfoModal.vue'
+import Expandable from '@/components/ui/Expandable.vue'
 import StairsDiagram from '@/components/diagrams/StairsDiagram.vue'
+
+/* ── Explicación de cada medida (botón ⓘ) ── */
+const infoItems = [
+  { term: 'Contrahuella (CH)', desc: 'Altura vertical de cada escalón. Cómoda entre 16 y 18 cm.' },
+  { term: 'Huella (H)', desc: 'Profundidad horizontal donde apoyás el pie. Recomendada 28 cm o más.' },
+  {
+    term: 'Blondel (2·CH + H)',
+    desc: 'Ley del paso: relaciona huella y contrahuella con la zancada humana. Debe rondar 62–64 cm para que la escalera sea cómoda.',
+  },
+  {
+    term: 'Inclinación',
+    desc: 'Ángulo de la escalera respecto a la horizontal. Cómoda entre 30° y 36°.',
+  },
+  {
+    term: 'Nº de huellas',
+    desc: 'Cantidad de peldaños que se pisan: es el número de escalones menos 1 (el último nivel ya es el piso superior).',
+  },
+  {
+    term: 'Desarrollo',
+    desc: 'Longitud horizontal que ocupa la escalera en planta (proyección del tramo).',
+  },
+]
 
 /* ── Estado ── */
 const heightVal = ref(280) // valor de altura en la unidad activa
@@ -55,8 +79,11 @@ const fmt = (n, d = 1) => n.toFixed(d)
 <template>
   <main class="card" role="main">
     <header class="view-head">
-      <h2>🪜 Calculadora de escaleras</h2>
-      <p>Indicá la altura a salvar y ajustá los escalones; el diagrama se actualiza en vivo.</p>
+      <div class="view-head-text">
+        <h2>🪜 Calculadora de escaleras</h2>
+        <p>Indicá la altura a salvar y ajustá los escalones; el diagrama se actualiza en vivo.</p>
+      </div>
+      <InfoModal title="¿Qué significa cada medida?" :items="infoItems" />
     </header>
 
     <!-- ── ENTRADAS ── -->
@@ -96,12 +123,14 @@ const fmt = (n, d = 1) => n.toFixed(d)
 
         <!-- ── DIAGRAMA ── -->
         <div class="diagram-col" aria-label="Diagrama de la escalera">
-          <StairsDiagram
-            :n-steps="r.nSteps"
-            :riser="r.riser"
-            :tread="r.tread"
-            :total-height="heightCm"
-          />
+          <Expandable>
+            <StairsDiagram
+              :n-steps="r.nSteps"
+              :riser="r.riser"
+              :tread="r.tread"
+              :total-height="heightCm"
+            />
+          </Expandable>
         </div>
       </div>
 
@@ -148,6 +177,10 @@ const fmt = (n, d = 1) => n.toFixed(d)
 
 <style scoped>
 .view-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
   margin-bottom: 20px;
 }
 .view-head h2 {
