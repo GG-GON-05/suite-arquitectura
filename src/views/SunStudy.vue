@@ -8,7 +8,6 @@ import {
   DATE_PRESETS,
   CITY_PRESETS,
 } from '@/composables/useSolar'
-import RangeSlider from '@/components/ui/RangeSlider.vue'
 import CopyButton from '@/components/ui/CopyButton.vue'
 import InfoModal from '@/components/ui/InfoModal.vue'
 import Expandable from '@/components/ui/Expandable.vue'
@@ -93,6 +92,46 @@ const lonLabel = computed(
 )
 const dateLabel = computed(() => dayLabel(dayOfYear.value))
 const timeLabel = computed(() => hourLabel(hour.value))
+
+/* ── Fecha como calendario (input type="date") ↔ día del año ── */
+const REF_YEAR = 2023 // año no bisiesto de referencia
+const dateStr = computed({
+  get() {
+    const d = new Date(REF_YEAR, 0, dayOfYear.value) // día 1 = 1 ene
+    const m = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${d.getFullYear()}-${m}-${day}`
+  },
+  set(v) {
+    if (!v) return
+    const d = new Date(`${v}T00:00:00`)
+    const start = new Date(d.getFullYear(), 0, 0)
+    const day = Math.round((d - start) / 86400000)
+    dayOfYear.value = Math.min(365, Math.max(1, day))
+  },
+})
+
+/* ── Hora como selector (input type="time") ↔ hora decimal ── */
+const timeStr = computed({
+  get: () => hourLabel(hour.value),
+  set(v) {
+    if (!v) return
+    const [h, m] = v.split(':').map(Number)
+    hour.value = (h || 0) + (m || 0) / 60
+  },
+})
+
+/* ── Atajos de orientación por punto cardinal ── */
+const CARDINAL_PRESETS = [
+  { label: 'N', deg: 0 },
+  { label: 'NE', deg: 45 },
+  { label: 'E', deg: 90 },
+  { label: 'SE', deg: 135 },
+  { label: 'S', deg: 180 },
+  { label: 'SO', deg: 225 },
+  { label: 'O', deg: 270 },
+  { label: 'NO', deg: 315 },
+]
 
 const CARDINALS = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO']
 const azCardinal = computed(() => CARDINALS[Math.round(sun.value.azimuthDeg / 45) % 8])
@@ -179,23 +218,9 @@ const copyText = computed(
 
     <!-- ── CONTROLES ── -->
     <section class="section controls">
-      <RangeSlider
-        v-model="hour"
-        :min="3"
-        :max="22"
-        :step="0.25"
-        label="Hora solar"
-        :display-value="timeLabel"
-      />
-      <div class="date-control">
-        <RangeSlider
-          v-model="dayOfYear"
-          :min="1"
-          :max="365"
-          :step="1"
-          label="Fecha"
-          :display-value="dateLabel"
-        />
+      <div class="field">
+        <span class="field-label">Fecha</span>
+        <input v-model="dateStr" class="ctrl-input" type="date" />
         <div class="presets">
           <button
             v-for="p in DATE_PRESETS"
@@ -210,23 +235,39 @@ const copyText = computed(
           </button>
         </div>
       </div>
-      <RangeSlider
-        v-model="buildingHeight"
-        :min="3"
-        :max="15"
-        :step="0.5"
-        :decimals="1"
-        label="Altura del edificio"
-        unit=" m"
-      />
-      <RangeSlider
-        v-model="orientation"
-        :min="0"
-        :max="360"
-        :step="5"
-        label="Orientación de la fachada"
-        :display-value="facadeLabel"
-      />
+
+      <div class="field">
+        <span class="field-label">Hora solar</span>
+        <input v-model="timeStr" class="ctrl-input" type="time" />
+      </div>
+
+      <div class="field">
+        <span class="field-label">Altura del edificio</span>
+        <div class="num-unit">
+          <input v-model.number="buildingHeight" class="ctrl-input" type="number" min="3" max="40" step="0.5" />
+          <span class="unit">m</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="field-label">Orientación de la fachada</span>
+        <div class="num-unit">
+          <input v-model.number="orientation" class="ctrl-input" type="number" min="0" max="360" step="5" />
+          <span class="unit">°</span>
+        </div>
+        <div class="presets">
+          <button
+            v-for="c in CARDINAL_PRESETS"
+            :key="c.deg"
+            type="button"
+            class="preset-btn"
+            :class="{ active: orientation === c.deg }"
+            @click="orientation = c.deg"
+          >
+            {{ c.label }}
+          </button>
+        </div>
+      </div>
     </section>
 
     <!-- ── RESULTADOS ── -->
@@ -368,10 +409,43 @@ const copyText = computed(
   gap: 18px 28px;
   align-items: start;
 }
-.date-control {
+.field {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
+}
+.field-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+.ctrl-input {
+  padding: 11px 13px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  background: var(--bg);
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+.ctrl-input:focus {
+  border-color: var(--brand);
+}
+.num-unit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.num-unit .ctrl-input {
+  width: 110px;
+}
+.num-unit .unit {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--muted);
 }
 .presets {
   display: flex;
