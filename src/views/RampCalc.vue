@@ -4,7 +4,28 @@ import { computeRamp, optimalSlope, RAMP_MSG } from '@/composables/useRamp'
 import RangeSlider from '@/components/ui/RangeSlider.vue'
 import ToggleGroup from '@/components/ui/ToggleGroup.vue'
 import CopyButton from '@/components/ui/CopyButton.vue'
+import InfoModal from '@/components/ui/InfoModal.vue'
+import Expandable from '@/components/ui/Expandable.vue'
 import RampDiagram from '@/components/diagrams/RampDiagram.vue'
+
+/* ── Explicación de cada medida (botón ⓘ) ── */
+const infoItems = [
+  {
+    term: 'Pendiente',
+    desc: 'Inclinación de la rampa en %: la altura dividida por la longitud horizontal, por 100.',
+  },
+  { term: 'Longitud', desc: 'Longitud horizontal (proyección en planta) que ocupa la rampa.' },
+  { term: 'Rampa (incl.)', desc: 'Longitud real de la superficie inclinada que se recorre.' },
+  { term: 'Inclinación', desc: 'Ángulo de la rampa respecto a la horizontal.' },
+  {
+    term: 'Pend. máx.',
+    desc: 'Pendiente máxima accesible según la longitud del tramo (CTE DB-SUA): 10% si <3 m, 8% si 3–6 m, 6% si ≥6 m.',
+  },
+  {
+    term: 'Tramos',
+    desc: 'Número de tramos en que se divide la rampa: si el recorrido supera 9 m, requiere un rellano intermedio.',
+  },
+]
 
 const MODES = [
   { value: 'slope', label: 'Fijo la pendiente' },
@@ -77,8 +98,11 @@ const m2 = (cm) => (cm / 100).toFixed(2)
 <template>
   <main class="card" role="main">
     <header class="view-head">
-      <h2>♿ Rampas y accesibilidad</h2>
-      <p>Calculá la longitud y la pendiente, y comprobá si cumple como rampa accesible.</p>
+      <div class="view-head-text">
+        <h2>♿ Rampas y accesibilidad</h2>
+        <p>Calculá la longitud y la pendiente, y comprobá si cumple como rampa accesible.</p>
+      </div>
+      <InfoModal title="¿Qué significa cada medida?" :items="infoItems" />
     </header>
 
     <!-- ── MODO ── -->
@@ -146,7 +170,9 @@ const m2 = (cm) => (cm / 100).toFixed(2)
 
       <!-- ── DIAGRAMA ── -->
       <section class="section" aria-label="Diagrama de la rampa">
-        <RampDiagram :rise="r.rise" :run="r.run" :slope-pct="r.slopePct" :status="r.status" />
+        <Expandable>
+          <RampDiagram :rise="r.rise" :run="r.run" :slope-pct="r.slopePct" :status="r.status" />
+        </Expandable>
       </section>
 
       <!-- ── RESULTADOS ── -->
@@ -196,6 +222,10 @@ const m2 = (cm) => (cm / 100).toFixed(2)
 
 <style scoped>
 .view-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
   margin-bottom: 20px;
 }
 .view-head h2 {

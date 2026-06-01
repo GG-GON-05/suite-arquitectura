@@ -10,7 +10,33 @@ import {
 } from '@/composables/useSolar'
 import RangeSlider from '@/components/ui/RangeSlider.vue'
 import CopyButton from '@/components/ui/CopyButton.vue'
+import InfoModal from '@/components/ui/InfoModal.vue'
+import Expandable from '@/components/ui/Expandable.vue'
 import SunScene from '@/components/diagrams/SunScene.vue'
+
+/* ── Explicación de cada dato (botón ⓘ) ── */
+const infoItems = [
+  {
+    term: 'Altura solar',
+    desc: 'Ángulo del sol sobre el horizonte: 0° en el horizonte, 90° en el cenit (justo encima).',
+  },
+  {
+    term: 'Azimut',
+    desc: 'Dirección del sol medida desde el Norte en sentido horario: 90° = Este, 180° = Sur, 270° = Oeste.',
+  },
+  {
+    term: 'Sombra',
+    desc: 'Longitud de la sombra que proyecta el edificio; depende de su altura y de la altura solar (a sol más bajo, sombra más larga).',
+  },
+  {
+    term: 'Orientación de la fachada',
+    desc: 'Hacia qué punto cardinal mira la cara principal del edificio (la coral).',
+  },
+  {
+    term: 'Hora solar',
+    desc: 'El mediodía corresponde al sol más alto; no coincide exactamente con la hora del reloj. La latitud es la que determina los ángulos.',
+  },
+]
 
 /* ── Estado ── */
 const latitude = ref(40.4)
@@ -87,22 +113,27 @@ const copyText = computed(
 <template>
   <main class="card" role="main">
     <header class="view-head">
-      <h2>☀️ Estudio de soleamiento</h2>
-      <p>
-        Posición real del sol según latitud, fecha y hora.
-        <strong>{{ dateLabel }} · {{ timeLabel }}</strong>
-      </p>
+      <div class="view-head-text">
+        <h2>☀️ Estudio de soleamiento</h2>
+        <p>
+          Posición real del sol según latitud, fecha y hora.
+          <strong>{{ dateLabel }} · {{ timeLabel }}</strong>
+        </p>
+      </div>
+      <InfoModal title="¿Qué significa cada dato?" :items="infoItems" />
     </header>
 
     <!-- ── ESCENA 3D ── -->
     <section class="section" aria-label="Escena 3D">
-      <SunScene
-        :latitude="latitude"
-        :day-of-year="dayOfYear"
-        :hour="hour"
-        :building-height="buildingHeight"
-        :orientation="orientation"
-      />
+      <Expandable>
+        <SunScene
+          :latitude="latitude"
+          :day-of-year="dayOfYear"
+          :hour="hour"
+          :building-height="buildingHeight"
+          :orientation="orientation"
+        />
+      </Expandable>
       <p class="legend">
         🔴 Flecha roja = <strong>Norte</strong> · cara coral = <strong>fachada principal</strong>
         · arrastrá para girar, rueda para acercar.
@@ -237,6 +268,10 @@ const copyText = computed(
 
 <style scoped>
 .view-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
   margin-bottom: 18px;
 }
 .view-head h2 {
