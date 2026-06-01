@@ -1,0 +1,26 @@
+{
+  "name": "suite-arquitectura",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Suite de herramientas visuales para estudiantes de arquitectura",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "up": "./scripts/start.sh",
+    "down": "./scripts/stop.sh",
+    "reup": "./scripts/restart.sh",
+    "status": "./scripts/status.sh"
+  },
+  "dependencies": {
+    "pinia": "^2.2.0",
+    "three": "^0.184.0",
+    "vue": "^3.5.0",
+    "vue-router": "^4.4.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.1.0",
+    "vite": "^5.4.0"
+  }
+}

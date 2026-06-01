@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Conversor de Escalas Arquitectónicas</title>
+  <style>
+    /* ── Variables de color ── */
+    :root {
+      --brand:       #5B6AF0;
+      --brand-light: #EEF0FD;
+      --brand-dark:  #3D4BBF;
+      --accent:      #F06A5B;
+      --accent-light:#FDF0EE;
+      --bg:          #F7F8FC;
+      --surface:     #FFFFFF;
+      --border:      #E2E5F0;
+      --text:        #1E2035;
+      --muted:       #6E7490;
+      --success:     #2ECC8F;
+      --radius-sm:   8px;
+      --radius-md:   14px;
+      --radius-lg:   22px;
+      --shadow:      0 4px 24px rgba(91,106,240,0.10);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      color: var(--text);
+    }
+
+    /* ── Cabecera ── */
+    .app-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .app-header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--brand-dark);
+      letter-spacing: -0.5px;
+    }
+    .app-header p {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ── Tarjeta principal ── */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      width: 100%;
+      max-width: 480px;
+      padding: 28px 28px 24px;
+    }
+
+    /* ── Sección genérica ── */
+    .section { margin-bottom: 24px; }
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    /* ── Switch de modo ── */
+    .mode-switch {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--bg);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .mode-btn {
+      padding: 14px 10px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--muted);
+      transition: all 0.18s;
+      line-height: 1.35;
+      text-align: center;
+    }
+    .mode-btn span.tag {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 400;
+      opacity: 0.8;
+      margin-top: 2px;
+    }
+    .mode-btn.active-real {
+      background: var(--brand);
+      color: #fff;
+      border-radius: var(--radius-sm);
+    }
+    .mode-btn.active-plan {
+      background: var(--accent);
+      color: #fff;
+      border-radius: var(--radius-sm);
+    }
+
+    /* ── Selector de unidades ── */
+    .unit-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .unit-btn {
+      padding: 9px 16px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .unit-btn:hover { border-color: var(--brand); color: var(--brand); }
+    .unit-btn.active {
+      background: var(--brand-light);
+      border-color: var(--brand);
+      color: var(--brand-dark);
+    }
+
+    /* ── Presets de escala ── */
+    .scale-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .scale-btn {
+      padding: 8px 13px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .scale-btn:hover { border-color: var(--brand); color: var(--brand); }
+    .scale-btn.active {
+      background: var(--brand-light);
+      border-color: var(--brand);
+      color: var(--brand-dark);
+    }
+
+    /* ── Botones unidad de resultado ── */
+    .result-unit-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .runit-btn {
+      padding: 9px 16px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .runit-btn:hover { border-color: #2ECC8F; color: #1a8a5a; }
+    .runit-btn.active {
+      background: #e8faf3;
+      border-color: #2ECC8F;
+      color: #1a7a50;
+    }
+
+    /* ── Input personalizado de escala ── */
+    .custom-scale-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .custom-scale-row span {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .custom-scale-input {
+      width: 100px;
+      padding: 10px 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      background: var(--bg);
+      transition: border-color 0.15s;
+      outline: none;
+    }
+    .custom-scale-input:focus { border-color: var(--brand); }
+
+    /* ── Input principal ── */
+    .main-input-wrap {
+      position: relative;
+    }
+    .main-input-label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .main-input-label strong { color: var(--text); }
+    .main-input {
+      width: 100%;
+      padding: 16px 18px;
+      font-size: 1.3rem;
+      font-weight: 600;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text);
+      background: var(--bg);
+      outline: none;
+      transition: border-color 0.18s;
+    }
+    .main-input:focus { border-color: var(--brand); }
+    .main-input.error { border-color: var(--accent); }
+
+    /* ── Área de resultado ── */
+    .result-box {
+      background: var(--brand-light);
+      border: 2px solid var(--brand);
+      border-radius: var(--radius-md);
+      padding: 20px 20px 16px;
+      margin-bottom: 24px;
+      min-height: 110px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .result-box.accent-mode {
+      background: var(--accent-light);
+      border-color: var(--accent);
+    }
+    .result-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--brand);
+      margin-bottom: 6px;
+    }
+    .result-box.accent-mode .result-label { color: var(--accent); }
+    .result-value {
+      font-size: 3rem;
+      font-weight: 800;
+      color: var(--brand-dark);
+      letter-spacing: -1.5px;
+      line-height: 1;
+      word-break: break-all;
+      text-align: center;
+    }
+    .result-box.accent-mode .result-value { color: #b03a2d; }
+    .result-unit {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--brand);
+      margin-left: 6px;
+    }
+    .result-box.accent-mode .result-unit { color: var(--accent); }
+    .result-operation {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 8px;
+      font-style: italic;
+      text-align: center;
+    }
+
+    /* ── Botón copiar ── */
+    .copy-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 14px;
+      border-radius: var(--radius-md);
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .copy-btn:hover {
+      border-color: var(--brand);
+      color: var(--brand);
+      background: var(--brand-light);
+    }
+    .copy-btn.copied {
+      background: var(--success);
+      border-color: var(--success);
+      color: #fff;
+    }
+    .copy-icon { font-size: 1.15rem; }
+
+    /* ── Separador ── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 8px 0 24px;
+    }
+
+    /* ── Error de validación ── */
+    .validation-msg {
+      font-size: 0.8rem;
+      color: var(--accent);
+      margin-top: 6px;
+      min-height: 18px;
+    }
+
+    @media (max-width: 520px) {
+      .card { padding: 20px 16px 18px; }
+      .result-value { font-size: 2.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="app-header">
+    <h1>📐 Escalas Arquitectónicas</h1>
+    <p>Conversor para planos y maquetas</p>
+  </header>
+
+  <main class="card" role="main">
+
+    <!-- ── MODO ── -->
+    <section class="section" aria-label="Modo de cálculo">
+      <p class="section-label">Modo de cálculo</p>
+      <div class="mode-switch" role="group" aria-label="Seleccionar modo">
+        <button class="mode-btn active-real" id="btn-real" onclick="setMode('real')" aria-pressed="true">
+          Real → Plano
+          <span class="tag">Ingreso la medida real</span>
+        </button>
+        <button class="mode-btn" id="btn-plan" onclick="setMode('plan')" aria-pressed="false">
+          Plano → Real
+          <span class="tag">Ingreso lo que mido en el plano</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ── UNIDAD ── -->
+    <section class="section" aria-label="Unidad de medida">
+      <p class="section-label">Unidad</p>
+      <div class="unit-grid" role="group" aria-label="Seleccionar unidad">
+        <button class="unit-btn active" onclick="setUnit('mm')">mm</button>
+        <button class="unit-btn" onclick="setUnit('cm')">cm</button>
+        <button class="unit-btn" onclick="setUnit('m')">m</button>
+        <button class="unit-btn" onclick="setUnit('in')">in</button>
+        <button class="unit-btn" onclick="setUnit('ft')">ft</button>
+      </div>
+    </section>
+
+    <!-- ── ESCALA ── -->
+    <section class="section" aria-label="Escala">
+      <p class="section-label">Escala</p>
+      <div class="scale-grid" role="group" aria-label="Presets de escala">
+        <button class="scale-btn" onclick="setScale(1)">1:1</button>
+        <button class="scale-btn" onclick="setScale(25)">1:25</button>
+        <button class="scale-btn active" onclick="setScale(50)">1:50</button>
+        <button class="scale-btn" onclick="setScale(75)">1:75</button>
+        <button class="scale-btn" onclick="setScale(100)">1:100</button>
+        <button class="scale-btn" onclick="setScale(125)">1:125</button>
+        <button class="scale-btn" onclick="setScale(200)">1:200</button>
+        <button class="scale-btn" onclick="setScale(500)">1:500</button>
+        <button class="scale-btn" id="btn-custom" onclick="setScale('custom')">Otra…</button>
+      </div>
+      <div class="custom-scale-row" id="custom-row" style="display:none;" aria-label="Escala personalizada">
+        <span>1 :</span>
+        <input
+          class="custom-scale-input"
+          id="custom-scale"
+          type="number"
+          min="1"
+          step="1"
+          placeholder="ej: 33"
+          oninput="onCustomScale()"
+          aria-label="Denominador de la escala personalizada"
+        />
+      </div>
+    </section>
+
+    <!-- ── UNIDAD DEL RESULTADO ── -->
+    <section class="section" aria-label="Unidad del resultado">
+      <p class="section-label">Resultado en</p>
+      <div class="result-unit-grid" role="group" aria-label="Unidad del resultado">
+        <button class="runit-btn active" onclick="setResultUnit('mm')">mm</button>
+        <button class="runit-btn" onclick="setResultUnit('cm')">cm</button>
+        <button class="runit-btn" onclick="setResultUnit('m')">m</button>
+        <button class="runit-btn" onclick="setResultUnit('in')">in</button>
+        <button class="runit-btn" onclick="setResultUnit('ft')">ft</button>
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- ── INPUT PRINCIPAL ── -->
+    <section class="section" aria-label="Medida de entrada">
+      <p class="main-input-label" id="input-label">
+        Medida <strong id="input-mode-word">real</strong> en <strong id="input-unit-label">mm</strong>
+      </p>
+      <div class="main-input-wrap">
+        <input
+          class="main-input"
+          id="main-input"
+          type="number"
+          min="0"
+          step="any"
+          placeholder="0"
+          oninput="calculate()"
+          aria-label="Medida de entrada"
+        />
+      </div>
+      <p class="validation-msg" id="validation-msg" aria-live="polite"></p>
+    </section>
+
+    <!-- ── RESULTADO ── -->
+    <section aria-label="Resultado">
+      <div class="result-box" id="result-box" aria-live="polite" aria-atomic="true">
+        <p class="result-label" id="result-label">Medida en plano</p>
+        <div>
+          <span class="result-value" id="result-value">—</span>
+          <span class="result-unit" id="result-unit">mm</span>
+        </div>
+        <p class="result-operation" id="result-operation"></p>
+      </div>
+    </section>
+
+    <!-- ── BOTÓN COPIAR ── -->
+    <button class="copy-btn" id="copy-btn" onclick="copyResult()" aria-label="Copiar resultado">
+      <span class="copy-icon">📋</span>
+      <span id="copy-label">Copiar resultado</span>
+    </button>
+
+  </main>
+
+  <script>
+    /*
+     * Estado global de la aplicación
+     */
+    const state = {
+      mode: 'real',
+      unit: 'mm',
+      resultUnit: 'mm',
+      scale: 50,
+      customScale: null,
+      rawValue: '',
+    };
+
+    /* ── Factores a mm (base interna) ── */
+    const TO_MM = { mm: 1, cm: 10, m: 1000, in: 25.4, ft: 304.8 };
+
+    /* ── Convertir entre unidades ── */
+    function convert(value, from, to) {
+      return value * TO_MM[from] / TO_MM[to];
+    }
+
+    /* ── Persistencia en localStorage ── */
+    function savePrefs() {
+      try {
+        localStorage.setItem('arch-conv', JSON.stringify({
+          mode: state.mode,
+          unit: state.unit,
+          resultUnit: state.resultUnit,
+          scale: state.scale,
+          customScale: state.customScale,
+          isCustom: state.isCustom,
+        }));
+      } catch (_) {}
+    }
+
+    function loadPrefs() {
+      try {
+        const raw = localStorage.getItem('arch-conv');
+        if (!raw) return;
+        const p = JSON.parse(raw);
+        state.mode       = p.mode       || 'real';
+        state.unit       = p.unit       || 'mm';
+        state.resultUnit = p.resultUnit || 'mm';
+        state.scale      = p.scale      || 50;
+        state.customScale = p.customScale || null;
+        state.isCustom    = p.isCustom    || false;
+      } catch (_) {}
+    }
+
+    /* ── Cambiar unidad del resultado ── */
+    function setResultUnit(unit) {
+      state.resultUnit = unit;
+      document.querySelectorAll('.runit-btn').forEach(b => {
+        b.classList.toggle('active', b.textContent.trim() === unit);
+      });
+      document.getElementById('result-unit').textContent = unit;
+      calculate();
+      savePrefs();
+    }
+
+    /* ── Cambiar modo ── */
+    function setMode(mode) {
+      state.mode = mode;
+      document.getElementById('btn-real').className =
+        'mode-btn' + (mode === 'real' ? ' active-real' : '');
+      document.getElementById('btn-plan').className =
+        'mode-btn' + (mode === 'plan' ? ' active-plan' : '');
+      document.getElementById('btn-real').setAttribute('aria-pressed', mode === 'real');
+      document.getElementById('btn-plan').setAttribute('aria-pressed', mode === 'plan');
+      updateLabels();
+      calculate();
+      savePrefs();
+    }
+
+    /* ── Cambiar unidad ── */
+    function setUnit(unit) {
+      state.unit = unit;
+      document.querySelectorAll('.unit-btn').forEach(b => {
+        b.classList.toggle('active', b.textContent.trim() === unit);
+      });
+      updateLabels();
+      calculate();
+      savePrefs();
+    }
+
+    /* ── Cambiar escala (preset) ── */
+    function setScale(val) {
+      if (val === 'custom') {
+        state.isCustom = true;
+        document.getElementById('custom-row').style.display = 'flex';
+        document.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('btn-custom').classList.add('active');
+        // usar el valor del input personalizado si ya tiene algo
+        const cv = parseFloat(document.getElementById('custom-scale').value);
+        state.scale = (!isNaN(cv) && cv > 0) ? cv : null;
+      } else {
+        state.isCustom = false;
+        state.scale    = val;
+        document.getElementById('custom-row').style.display = 'none';
+        document.querySelectorAll('.scale-btn').forEach(b => {
+          b.classList.toggle('active', b.textContent.trim() === '1:' + val || b.textContent.trim() === '1:1' && val === 1);
+        });
+      }
+      calculate();
+      savePrefs();
+    }
+
+    /* ── Cambiar escala personalizada ── */
+    function onCustomScale() {
+      const cv = parseFloat(document.getElementById('custom-scale').value);
+      state.scale = (!isNaN(cv) && cv > 0) ? cv : null;
+      calculate();
+      savePrefs();
+    }
+
+    /* ── Formatear número: usa hasta 6 decimales, elimina ceros finales ── */
+    function fmt(n) {
+      if (!isFinite(n)) return '—';
+      // para números muy grandes o muy pequeños usar notación fija con hasta 6 dec
+      const s = parseFloat(n.toFixed(6)).toString();
+      return s;
+    }
+
+    /* ── Actualizar etiquetas dinámicas ── */
+    function updateLabels() {
+      const u = state.unit;
+      const ru = state.resultUnit;
+      const isReal = state.mode === 'real';
+      document.getElementById('input-mode-word').textContent  = isReal ? 'real' : 'en plano';
+      document.getElementById('input-unit-label').textContent = u;
+      document.getElementById('result-label').textContent     = isReal ? 'Medida en plano' : 'Medida real';
+      document.getElementById('result-unit').textContent      = ru;
+
+      const rb = document.getElementById('result-box');
+      if (isReal) {
+        rb.classList.remove('accent-mode');
+      } else {
+        rb.classList.add('accent-mode');
+      }
+    }
+
+    /* ── Cálculo principal ── */
+    function calculate() {
+      const raw = document.getElementById('main-input').value.trim();
+      const inp = document.getElementById('main-input');
+      const valMsg = document.getElementById('validation-msg');
+      const rvEl   = document.getElementById('result-value');
+      const roEl   = document.getElementById('result-operation');
+
+      state.rawValue = raw;
+
+      // validación
+      if (raw === '' || raw === null) {
+        rvEl.textContent = '—';
+        roEl.textContent = '';
+        inp.classList.remove('error');
+        valMsg.textContent = '';
+        return;
+      }
+
+      const v = parseFloat(raw);
+
+      if (isNaN(v) || v < 0) {
+        rvEl.textContent = '?';
+        roEl.textContent = '';
+        inp.classList.add('error');
+        valMsg.textContent = 'Por favor ingresá un número positivo.';
+        return;
+      }
+
+      inp.classList.remove('error');
+      valMsg.textContent = '';
+
+      const s = state.scale;
+
+      if (!s || s <= 0) {
+        rvEl.textContent = '?';
+        roEl.textContent = 'Definí una escala válida (mayor a 0).';
+        return;
+      }
+
+      const u  = state.unit;
+      const ru = state.resultUnit;
+      let result, operation;
+
+      if (state.mode === 'real') {
+        // Real → Plano: dividir por la escala, luego convertir a unidad de resultado
+        const rawResult = v / s;                        // en unidad de entrada
+        result = convert(rawResult, u, ru);             // en unidad de resultado
+        operation = `${fmt(v)} ${u} ÷ ${s} = ${fmt(rawResult)} ${u}${ru !== u ? ` = ${fmt(result)} ${ru}` : ''}`;
+      } else {
+        // Plano → Real: multiplicar por la escala, luego convertir a unidad de resultado
+        const rawResult = v * s;                        // en unidad de entrada
+        result = convert(rawResult, u, ru);             // en unidad de resultado
+        operation = `${fmt(v)} ${u} × ${s} = ${fmt(rawResult)} ${u}${ru !== u ? ` = ${fmt(result)} ${ru}` : ''}`;
+      }
+
+      rvEl.textContent = fmt(result);
+      roEl.textContent = operation;
+    }
+
+    /* ── Copiar resultado ── */
+    function copyResult() {
+      const val = document.getElementById('result-value').textContent;
+      const unit = state.unit;
+      if (val === '—' || val === '?') return;
+      const text = val + ' ' + state.resultUnit;
+
+      const btn   = document.getElementById('copy-btn');
+      const label = document.getElementById('copy-label');
+
+      function feedback() {
+        btn.classList.add('copied');
+        label.textContent = '¡Copiado!';
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          label.textContent = 'Copiar resultado';
+        }, 1800);
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(feedback).catch(() => fallbackCopy(text, feedback));
+      } else {
+        fallbackCopy(text, feedback);
+      }
+    }
+
+    function fallbackCopy(text, cb) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity  = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try { document.execCommand('copy'); cb(); } catch (_) {}
+      document.body.removeChild(ta);
+    }
+
+    /* ── Restaurar interfaz desde preferencias guardadas ── */
+    function restoreUI() {
+      // Modo
+      document.getElementById('btn-real').className =
+        'mode-btn' + (state.mode === 'real' ? ' active-real' : '');
+      document.getElementById('btn-plan').className =
+        'mode-btn' + (state.mode === 'plan' ? ' active-plan' : '');
+
+      // Unidad
+      document.querySelectorAll('.unit-btn').forEach(b => {
+        b.classList.toggle('active', b.textContent.trim() === state.unit);
+      });
+
+      // Escala
+      if (state.isCustom) {
+        document.getElementById('custom-row').style.display = 'flex';
+        document.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('btn-custom').classList.add('active');
+        if (state.scale) document.getElementById('custom-scale').value = state.scale;
+      } else {
+        document.querySelectorAll('.scale-btn').forEach(b => {
+          const txt = b.textContent.trim();
+          const match = txt === '1:' + state.scale || (txt === '1:1' && state.scale === 1);
+          b.classList.toggle('active', match);
+        });
+      }
+
+      // Unidad de resultado
+      document.querySelectorAll('.runit-btn').forEach(b => {
+        b.classList.toggle('active', b.textContent.trim() === state.resultUnit);
+      });
+
+      updateLabels();
+    }
+
+    /* ── Inicializar ── */
+    loadPrefs();
+    restoreUI();
+    calculate();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,185 @@
+/* ──────────────────────────────────────────────
+   Suite de Arquitectura — Sistema de diseño global
+   (extraído del conversor original medidas_arq.html)
+   ────────────────────────────────────────────── */
+
+/* ── Variables de color y tokens ── */
+:root {
+  --brand:        #5B6AF0;
+  --brand-light:  #EEF0FD;
+  --brand-dark:   #3D4BBF;
+  --accent:       #F06A5B;
+  --accent-light: #FDF0EE;
+  --bg:           #F7F8FC;
+  --surface:      #FFFFFF;
+  --border:       #E2E5F0;
+  --text:         #1E2035;
+  --muted:        #6E7490;
+  --success:      #2ECC8F;
+  --radius-sm:    8px;
+  --radius-md:    14px;
+  --radius-lg:    22px;
+  --shadow:       0 4px 24px rgba(91, 106, 240, 0.10);
+}
+
+/* ── Reset ── */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  min-height: 100vh;
+  color: var(--text);
+}
+
+/* ── Layout de la app ── */
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px 48px;
+}
+
+/* ── Tarjeta principal reutilizable ── */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  width: 100%;
+  max-width: var(--content-max, 480px);
+  padding: 28px 28px 24px;
+  transition: max-width 0.25s ease;
+}
+
+/* ── Sección genérica ── */
+.section {
+  margin-bottom: 24px;
+}
+.section-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+/* ── Separador ── */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 8px 0 24px;
+}
+
+/* ── Resultados: rejilla de estadísticas con semáforo ── */
+/* Compartido entre módulos (escaleras, rampas, …). Cada vista define
+   sus columnas con .stats; aquí va la apariencia de cada tarjeta. */
+.stats {
+  display: grid;
+  gap: 8px;
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 10px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  text-align: center;
+}
+.stat-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--muted);
+}
+.stat-value {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.1;
+}
+.stat-value small {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-left: 2px;
+}
+.stat.ok {
+  background: #e8faf3;
+  border-color: var(--success);
+}
+.stat.ok .stat-value {
+  color: #1a7a50;
+}
+.stat.warn {
+  background: #fff7e6;
+  border-color: #f0b429;
+}
+.stat.warn .stat-value {
+  color: #a96b00;
+}
+.stat.bad {
+  background: var(--accent-light);
+  border-color: var(--accent);
+}
+.stat.bad .stat-value {
+  color: #b03a2d;
+}
+
+/* ── Botón "Ajuste óptimo" (compartido) ── */
+.optimize-btn {
+  align-self: flex-start;
+  padding: 9px 16px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--brand);
+  background: var(--brand-light);
+  color: var(--brand-dark);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.optimize-btn:hover {
+  background: var(--brand);
+  color: #fff;
+}
+
+/* ── Banner de comodidad / cumplimiento ── */
+.comfort {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+  font-weight: 600;
+  margin: 18px 0;
+}
+.comfort-icon {
+  font-weight: 800;
+}
+.comfort.ok {
+  background: #e8faf3;
+  color: #1a7a50;
+}
+.comfort.warn {
+  background: #fff7e6;
+  color: #a96b00;
+}
+.comfort.bad {
+  background: var(--accent-light);
+  color: #b03a2d;
+}
+
+@media (max-width: 520px) {
+  .card { padding: 20px 16px 18px; }
+}
