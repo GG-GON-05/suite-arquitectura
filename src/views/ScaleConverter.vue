@@ -9,8 +9,11 @@ import CopyButton from '@/components/ui/CopyButton.vue'
 const prefs = usePrefsStore()
 const { mode, unit, resultUnit, scale, customScale, isCustom } = storeToRefs(prefs)
 
-/* ── Entrada del usuario ── */
+/* ── Entrada del usuario ──
+   Con <input type="number">, v-model entrega un número (o '' si está vacío),
+   así que normalizamos a texto para las comprobaciones de vacío/validez. */
 const rawInput = ref('')
+const rawText = computed(() => String(rawInput.value ?? '').trim())
 
 /* ── Escala efectiva (preset o personalizada) ── */
 const activeScale = computed(() => (isCustom.value ? customScale.value : scale.value))
@@ -23,7 +26,7 @@ const isAccent = computed(() => mode.value === 'plan')
 /* ── Validación ── */
 const numericValue = computed(() => parseFloat(rawInput.value))
 const inputError = computed(() => {
-  if (rawInput.value.trim() === '') return false
+  if (rawText.value === '') return false
   return isNaN(numericValue.value) || numericValue.value < 0
 })
 const validationMsg = computed(() =>
@@ -32,7 +35,7 @@ const validationMsg = computed(() =>
 
 /* ── Cálculo principal ── */
 const calc = computed(() => {
-  if (rawInput.value.trim() === '' || inputError.value) return null
+  if (rawText.value === '' || inputError.value) return null
   return computeScale({
     value: numericValue.value,
     mode: mode.value,
@@ -43,7 +46,7 @@ const calc = computed(() => {
 })
 
 const resultValue = computed(() => {
-  if (rawInput.value.trim() === '') return '—'
+  if (rawText.value === '') return '—'
   if (inputError.value) return '?'
   if (!activeScale.value || activeScale.value <= 0) return '?'
   return fmt(calc.value.result)
@@ -51,7 +54,7 @@ const resultValue = computed(() => {
 
 const resultOperation = computed(() => {
   if (!activeScale.value || activeScale.value <= 0) {
-    return rawInput.value.trim() !== '' && !inputError.value
+    return rawText.value !== '' && !inputError.value
       ? 'Definí una escala válida (mayor a 0).'
       : ''
   }
